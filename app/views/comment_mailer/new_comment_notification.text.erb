@@ -1,0 +1,13 @@
+New Comment on Your Article!
+============================
+
+A new comment has been posted on your article: <%= @article.title %>
+
+Commenter: <%= @comment.commenter %>
+
+Comment:
+<%= @comment.body %>
+
+View the article: <%= @url %>
+
+Posted at: <%= @comment.created_at.strftime("%B %d, %Y at %I:%M %p") %>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Blog</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body>
+    <%# Add flash message display %>
+    <% if notice %>
+      <p style="color: green; background: #d4edda; padding: 10px; border-radius: 4px;">
+        <%= notice %>
+      </p>
+    <% end %>
+    
+    <% if alert %>
+      <p style="color: red; background: #f8d7da; padding: 10px; border-radius: 4px;">
+        <%= alert %>
+      </p>
+    <% end %>
+
+    <%= yield %>
+  </body>
+</html>
