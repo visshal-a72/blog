@@ -22,7 +22,7 @@ gem 'redis', '~> 4.0'
 # Background job processing
 gem 'sidekiq', '~> 7.0'
 # Use Active Model has_secure_password
-# gem 'bcrypt', '~> 3.1.7'
+gem 'bcrypt', '~> 3.1.7'
 
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
@@ -38,6 +38,10 @@ gem 'bigdecimal'
 # Add these gems (removed from Ruby 3.4 stdlib)
 gem 'drb'
 gem 'benchmark'
+
+# Authentication
+gem 'authlogic', '~> 6.4'
+gem 'scrypt', '~> 3.0'  # For password hashing
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

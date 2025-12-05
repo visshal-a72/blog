@@ -11,7 +11,19 @@
   </head>
 
   <body>
-    <%# Add flash message display %>
+    <nav style="background: #f0f0f0; padding: 10px; margin-bottom: 20px;">
+      <%= link_to "Blog Home", root_path %>
+      
+      <% if logged_in? %>
+        | Logged in as <strong><%= current_user.name %></strong>
+        | <%= link_to "Profile", profile_path %>
+        | <%= link_to "Logout", logout_path, method: :delete %>
+      <% else %>
+        | <%= link_to "Login", login_path %>
+        | <%= link_to "Register", register_path %>
+      <% end %>
+    </nav>
+
     <% if notice %>
       <p style="color: green; background: #d4edda; padding: 10px; border-radius: 4px;">
         <%= notice %>
