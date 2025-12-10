@@ -11,7 +11,8 @@ class CommentsController < ApplicationController
     @comment = @article.comments.create(comment_params)
 
     if @comment.persisted?
-      CommentNotificationJob.perform_later(@article.id, @comment.id)
+      # Manual enqueue with Sidekiq::Client
+      CommentNotificationJob.enqueue(@article.id, @comment.id)
     end
 
     redirect_to article_path(@article)
