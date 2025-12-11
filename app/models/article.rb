@@ -27,15 +27,64 @@ class Article < ApplicationRecord
 
   def self.search_articles(query)
     return all if query.blank?
-    
-    __elasticsearch__.search(query).records
+
+    # Parse query language
+    parsed = parse_query(query)
+    search_text = parsed[:text]
+    status_filter = parsed[:status]
+
+    search_definition = {
+      query: {
+        bool: {
+          filter: []
+        }
+      }
+    }
+
+    # Add text search if present
+    if search_text.present?
+      search_definition[:query][:bool][:must] = {
+        multi_match: {
+          query: search_text,
+          fields: ['title^3', 'body'],
+          fuzziness: 'AUTO'
+        }
+      }
+    else
+      search_definition[:query][:bool][:must] = { match_all: {} }
+    end
+
+    # Add status filter
+    if status_filter.present?
+      search_definition[:query][:bool][:filter] << { term: { status: status_filter } }
+    else
+      search_definition[:query][:bool][:filter] << { term: { status: 'public' } }
+    end
+
+    __elasticsearch__.search(search_definition).records
   end
 
   private
 
+  # Parse query syntax: "status:public rails tutorial" => { status: 'public', text: 'rails tutorial' }
+  def self.parse_query(query)
+    status = nil
+    text_parts = []
+
+    query.split(/\s+/).each do |token|
+      if token.match?(/^status:(\w+)$/i)
+        status = token.split(':').last.downcase
+      else
+        text_parts << token
+      end
+    end
+
+    { status: status, text: text_parts.join(' ') }
+  end
+
   def invalidate_cache
     CacheStore.redis_delete("article:#{id}")
     CacheStore.memcached_delete("articles:published")
-    CacheStore.redis_delete("article:public_count")  # Add this line
+    CacheStore.redis_delete("article:public_count")
   end
 end
