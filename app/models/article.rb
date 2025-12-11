@@ -25,6 +25,10 @@ class Article < ApplicationRecord
   # Invalidate cache on update
   after_commit :invalidate_cache
 
+  after_create_commit  { KafkaPublisher.publish('blog.articles', 'created', kafka_payload) }
+  after_update_commit  { KafkaPublisher.publish('blog.articles', 'updated', kafka_payload) }
+  after_destroy_commit { KafkaPublisher.publish('blog.articles', 'deleted', { id: id }) }
+
   def self.search_articles(query)
     return all if query.blank?
 
@@ -80,6 +84,10 @@ class Article < ApplicationRecord
     end
 
     { status: status, text: text_parts.join(' ') }
+  end
+
+  def kafka_payload
+    { id: id, title: title, status: status }
   end
 
   def invalidate_cache

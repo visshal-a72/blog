@@ -83,3 +83,6 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 # Elasticsearch
 gem 'elasticsearch-model', '~> 7.2'
 gem 'elasticsearch-rails', '~> 7.2'
+
+# Kafka
+gem 'ruby-kafka', '~> 1.5'
