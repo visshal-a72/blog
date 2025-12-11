@@ -8,20 +8,29 @@ class CommentsController < ApplicationController
       return
     end
     
-    @comment = @article.comments.create(comment_params)
+    @comment = @article.comments.build(comment_params)
 
-    if @comment.persisted?
-      # Manual enqueue with Sidekiq::Client
-      CommentNotificationJob.enqueue(@article.id, @comment.id)
+    if @comment.save
+      begin
+        CommentNotificationJob.enqueue(@article.id, @comment.id)
+      rescue Redis::CannotConnectError, Sidekiq::Client::Error => e
+        Rails.logger.error "Failed to enqueue notification job: #{e.message}"
+        # Comment was saved, just log the notification failure
+      end
+      redirect_to article_path(@article), notice: "Comment added."
+    else
+      redirect_to article_path(@article), alert: "Failed to add comment: #{@comment.errors.full_messages.join(', ')}"
     end
-
-    redirect_to article_path(@article)
   end
 
   def destroy
     @comment = @article.comments.find(params[:id])
-    @comment.destroy
-    redirect_to article_path(@article), notice: "Comment deleted."
+    
+    if @comment.destroy
+      redirect_to article_path(@article), notice: "Comment deleted."
+    else
+      redirect_to article_path(@article), alert: "Failed to delete comment."
+    end
   end
 
   private

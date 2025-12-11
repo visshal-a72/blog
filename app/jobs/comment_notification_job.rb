@@ -18,8 +18,17 @@ class CommentNotificationJob
     article = Article.find_by(id: article_id)
     comment = Comment.find_by(id: comment_id)
 
-    return unless article && comment
+    unless article && comment
+      Rails.logger.warn "CommentNotificationJob: Article #{article_id} or Comment #{comment_id} not found, skipping"
+      return
+    end
 
-    CommentMailer.new_comment_notification(article, comment).deliver_now
+    begin
+      CommentMailer.new_comment_notification(article, comment).deliver_now
+      Rails.logger.info "CommentNotificationJob: Sent notification for comment #{comment_id}"
+    rescue Net::SMTPError, Net::OpenTimeout => e
+      Rails.logger.error "CommentNotificationJob: Mail delivery failed - #{e.message}"
+      raise # Re-raise to trigger Sidekiq retry
+    end
   end
 end
